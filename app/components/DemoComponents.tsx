@@ -15,7 +15,7 @@ import {
   TransactionStatusLabel,
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
-import { useNotification } from "@coinbase/onchainkit/minikit";
+import { useNotification, useClose } from "@coinbase/onchainkit/minikit";
 
 type ButtonProps = {
   children: ReactNode;
@@ -158,6 +158,8 @@ type HomeProps = {
 };
 
 export function Home({ setActiveTab }: HomeProps) {
+  const close = useClose();
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Card title="My First Mini App">
@@ -170,6 +172,15 @@ export function Home({ setActiveTab }: HomeProps) {
         >
           Explore Features
         </Button>
+        <div className="mt-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => close()}
+          >
+            Close Mini App
+          </Button>
+        </div>
       </Card>
 
       <TodoList />
