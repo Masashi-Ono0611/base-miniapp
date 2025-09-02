@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+.yarn/install-state.gz
 
 # Local env files
 .env
@@ -36,3 +37,29 @@ npm-debug.log*
 
 **/.claude/settings.local.json
 .claude.json
+
+# next.js/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+>>>>>>> e0af60100b022c3d0003f52fede170b6c6bffab7
