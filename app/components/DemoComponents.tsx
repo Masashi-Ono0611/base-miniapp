@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import {
@@ -111,79 +112,54 @@ function Card({
   );
 }
 
-type FeaturesProps = {
-  setActiveTab: (tab: string) => void;
-};
+// Features removed for BONSAI Tap-to-Earn minimal UI
 
-export function Features({ setActiveTab }: FeaturesProps) {
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <Card title="Key Features">
-        <ul className="space-y-3 mb-4">
-          <li className="flex items-start">
-            <Icon name="check" className="text-[var(--app-accent)] mt-1 mr-2" />
-            <span className="text-[var(--app-foreground-muted)]">
-              Minimalistic and beautiful UI design
-            </span>
-          </li>
-          <li className="flex items-start">
-            <Icon name="check" className="text-[var(--app-accent)] mt-1 mr-2" />
-            <span className="text-[var(--app-foreground-muted)]">
-              Responsive layout for all devices
-            </span>
-          </li>
-          <li className="flex items-start">
-            <Icon name="check" className="text-[var(--app-accent)] mt-1 mr-2" />
-            <span className="text-[var(--app-foreground-muted)]">
-              Dark mode support
-            </span>
-          </li>
-          <li className="flex items-start">
-            <Icon name="check" className="text-[var(--app-accent)] mt-1 mr-2" />
-            <span className="text-[var(--app-foreground-muted)]">
-              OnchainKit integration
-            </span>
-          </li>
-        </ul>
-        <Button variant="outline" onClick={() => setActiveTab("home")}>
-          Back to Home
-        </Button>
-      </Card>
-    </div>
-  );
-}
-
-type HomeProps = {
-  setActiveTab: (tab: string) => void;
-};
-
-export function Home({ setActiveTab }: HomeProps) {
+export function Home() {
   const close = useClose();
+  const [points, setPoints] = useState<number>(0);
+
+  const handleTap = useCallback(() => setPoints((p) => p + 1), []);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Card title="My First Mini App">
-        <p className="text-[var(--app-foreground-muted)] mb-4">
-          This is a minimalistic Mini App built with OnchainKit components.
-        </p>
-        <Button
-          onClick={() => setActiveTab("features")}
-          icon={<Icon name="arrow-right" size="sm" />}
-        >
-          Explore Features
-        </Button>
-        <div className="mt-3">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => close()}
-          >
-            Close Mini App
-          </Button>
+      <Card title="BONSAI Tap to Earn">
+        <div className="space-y-4">
+          <p className="text-[var(--app-foreground-muted)]">
+            Tap the bonsai to earn Bonsai Points.
+          </p>
+
+          <div className="flex flex-col items-center">
+            <div className="text-4xl font-bold text-[var(--app-foreground)] mb-2">
+              {points} pts
+            </div>
+            <button
+              type="button"
+              aria-label="Tap bonsai to earn"
+              onPointerDown={(e) => {
+                e.preventDefault();
+                handleTap();
+              }}
+              className="rounded-xl border border-[var(--app-card-border)] p-2 hover:scale-[1.02] active:scale-95 transition-transform bg-[var(--app-card-bg)] select-none"
+            >
+              <Image
+                src="https://static.wixstatic.com/media/3e4de0_01df3c0ec3f240b9811cd3632070381f~mv2.jpg/v1/fill/w_200,h_200,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/bok3.jpg"
+                alt="BONSAI"
+                width={200}
+                height={200}
+                priority
+                className="rounded-lg"
+                draggable={false}
+              />
+            </button>
+
+            <div className="mt-3">
+              <Button variant="secondary" size="sm" onClick={() => close()}>
+                Close Mini App
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
-
-      <TodoList />
 
       <TransactionCard />
     </div>
@@ -290,112 +266,7 @@ export function Icon({ name, size = "md", className = "" }: IconProps) {
   );
 }
 
-type Todo = {
-  id: number;
-  text: string;
-  completed: boolean;
-}
-
-function TodoList() {
-  const [todos, setTodos] = useState<Todo[]>([
-    { id: 1, text: "Learn about MiniKit", completed: false },
-    { id: 2, text: "Build a Mini App", completed: true },
-    { id: 3, text: "Deploy to Base and go viral", completed: false },
-  ]);
-  const [newTodo, setNewTodo] = useState("");
-
-  const addTodo = () => {
-    if (newTodo.trim() === "") return;
-
-    const newId =
-      todos.length > 0 ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
-    setTodos([...todos, { id: newId, text: newTodo, completed: false }]);
-    setNewTodo("");
-  };
-
-  const toggleTodo = (id: number) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
-      ),
-    );
-  };
-
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      addTodo();
-    }
-  };
-
-  return (
-    <Card title="Get started">
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Add a new task..."
-            className="flex-1 px-3 py-2 bg-[var(--app-card-bg)] border border-[var(--app-card-border)] rounded-lg text-[var(--app-foreground)] placeholder-[var(--app-foreground-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--app-accent)]"
-          />
-          <Button
-            variant="primary"
-            size="md"
-            onClick={addTodo}
-            icon={<Icon name="plus" size="sm" />}
-          >
-            Add
-          </Button>
-        </div>
-
-        <ul className="space-y-2">
-          {todos.map((todo) => (
-            <li key={todo.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  id={`todo-${todo.id}`}
-                  onClick={() => toggleTodo(todo.id)}
-                  className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                    todo.completed
-                      ? "bg-[var(--app-accent)] border-[var(--app-accent)]"
-                      : "border-[var(--app-foreground-muted)] bg-transparent"
-                  }`}
-                >
-                  {todo.completed && (
-                    <Icon
-                      name="check"
-                      size="sm"
-                      className="text-[var(--app-background)]"
-                    />
-                  )}
-                </button>
-                <label
-                  htmlFor={`todo-${todo.id}`}
-                  className={`text-[var(--app-foreground-muted)] cursor-pointer ${todo.completed ? "line-through opacity-70" : ""}`}
-                >
-                  {todo.text}
-                </label>
-              </div>
-              <button
-                type="button"
-                onClick={() => deleteTodo(todo.id)}
-                className="text-[var(--app-foreground-muted)] hover:text-[var(--app-foreground)]"
-              >
-                ×
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Card>
-  );
-}
+// TodoList removed for minimal UI
 
 
 function TransactionCard() {
