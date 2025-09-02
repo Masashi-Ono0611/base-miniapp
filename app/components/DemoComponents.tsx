@@ -16,7 +16,7 @@ import {
   TransactionStatusLabel,
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
-import { useNotification, useClose } from "@coinbase/onchainkit/minikit";
+import { useNotification, useClose, useMiniKit } from "@coinbase/onchainkit/minikit";
 
 type ButtonProps = {
   children: ReactNode;
@@ -117,17 +117,47 @@ function Card({
 export function Home() {
   const close = useClose();
   const [points, setPoints] = useState<number>(0);
+ 
+  const { context, setFrameReady } = useMiniKit();
 
-  // MVP: obtain fid from URL (?fid=123) after mount to avoid SSR/CSR mismatch
+  // Prefer Farcaster Mini App context fid; fallback to URL query on web
   const [fid, setFid] = useState<string | null>(null);
+
+  // Initialize MiniKit frame and capture context fid
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const ctx = await setFrameReady();
+        if (cancelled) return;
+        const f = ctx?.context?.user?.fid;
+        if (f) setFid(String(f));
+      } catch (e) {
+        console.warn("setFrameReady failed", e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [setFrameReady]);
+
+  // Watch for context updates and sync fid
+  useEffect(() => {
+    const f = context?.user?.fid;
+    if (f) setFid(String(f));
+  }, [context]);
+
+  // Fallback: obtain fid from URL (?fid=123) after mount to avoid SSR/CSR mismatch
+  useEffect(() => {
+    if (fid) return;
     try {
       const sp = new URLSearchParams(window.location.search);
-      setFid(sp.get("fid"));
+      const qfid = sp.get("fid");
+      if (qfid) setFid(qfid);
     } catch {
-      setFid(null);
+      // ignore
     }
-  }, []);
+  }, [fid]);
 
   // Load initial points when fid exists
   useEffect(() => {
