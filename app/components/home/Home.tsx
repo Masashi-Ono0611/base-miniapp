@@ -2,13 +2,10 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { useClose, useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useMiniKit } from "@coinbase/onchainkit/minikit";
 import Card from "../ui/Card";
-import Button from "../ui/Button";
-import TransactionCard from "../transaction/TransactionCard";
 
 export default function Home() {
-  const close = useClose();
   const [points, setPoints] = useState<number>(0);
 
   const { context, setFrameReady } = useMiniKit();
@@ -123,17 +120,9 @@ export default function Home() {
                 draggable={false}
               />
             </button>
-
-            <div className="mt-3">
-              <Button variant="secondary" size="sm" onClick={() => close()}>
-                Close Mini App
-              </Button>
-            </div>
           </div>
         </div>
       </Card>
-
-      <TransactionCard />
     </div>
   );
 }
