@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import {
   Transaction,
@@ -118,7 +118,65 @@ export function Home() {
   const close = useClose();
   const [points, setPoints] = useState<number>(0);
 
-  const handleTap = useCallback(() => setPoints((p) => p + 1), []);
+  // MVP: obtain fid from URL (?fid=123) after mount to avoid SSR/CSR mismatch
+  const [fid, setFid] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      setFid(sp.get("fid"));
+    } catch {
+      setFid(null);
+    }
+  }, []);
+
+  // Load initial points when fid exists
+  useEffect(() => {
+    if (!fid) return;
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(`/api/points?fid=${encodeURIComponent(fid)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const next =
+          typeof data.points === "number"
+            ? data.points
+            : Number(data.points ?? 0) || 0;
+        setPoints(next);
+      } catch (e) {
+        // noop for aborts / network errors in MVP
+        console.warn("failed to load points", e);
+      }
+    })();
+    return () => controller.abort();
+  }, [fid]);
+
+  const handleTap = useCallback(async () => {
+    if (fid) {
+      try {
+        const res = await fetch("/api/points/increment", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ fid }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const next =
+            typeof data.points === "number"
+              ? data.points
+              : Number(data.points ?? 0) || 0;
+          setPoints(next);
+          return;
+        }
+      } catch (e) {
+        console.warn("increment failed, fallback to local", e);
+      }
+    }
+    // Fallback for when fid is absent or API fails
+    setPoints((p) => p + 1);
+  }, [fid]);
 
   return (
     <div className="space-y-6 animate-fade-in">
