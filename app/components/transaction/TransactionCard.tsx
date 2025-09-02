@@ -6,12 +6,10 @@ import {
   Transaction,
   TransactionButton,
   TransactionToast,
-  TransactionToastAction,
   TransactionToastIcon,
   TransactionToastLabel,
   TransactionError,
   TransactionResponse,
-  TransactionStatusAction,
   TransactionStatusLabel,
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
@@ -19,6 +17,68 @@ import { useNotification } from "@coinbase/onchainkit/minikit";
 import Card from "../ui/Card";
 import { createPublicClient, http, encodeFunctionData, parseUnits } from "viem";
 import { baseSepolia } from "viem/chains";
+
+// Hoisted ABIs to module scope to keep stable identities (satisfies react-hooks/exhaustive-deps)
+const erc20Abi = [
+  {
+    type: "function",
+    name: "decimals",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+  {
+    type: "function",
+    name: "balanceOf",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "allowance",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "approve",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "value", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
+] as const;
+
+const vaultAbi = [
+  {
+    type: "function",
+    name: "deposit",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "withdraw",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "balanceOf",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
 
 export default function TransactionCard() {
   const { address } = useAccount();
@@ -28,6 +88,7 @@ export default function TransactionCard() {
   const [tokenBalance, setTokenBalance] = useState<bigint>(0n);
   const [vaultBalance, setVaultBalance] = useState<bigint>(0n);
   const [allowance, setAllowance] = useState<bigint>(0n);
+  const [txKey, setTxKey] = useState<number>(0);
   const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as `0x${string}` | undefined;
   const vaultAddress = process.env.NEXT_PUBLIC_VAULT_ADDRESS as `0x${string}` | undefined;
 
@@ -40,92 +101,29 @@ export default function TransactionCard() {
     []
   );
 
-  const erc20Abi = [
-    {
-      type: "function",
-      name: "decimals",
-      stateMutability: "view",
-      inputs: [],
-      outputs: [{ name: "", type: "uint8" }],
-    },
-    {
-      type: "function",
-      name: "balanceOf",
-      stateMutability: "view",
-      inputs: [{ name: "account", type: "address" }],
-      outputs: [{ name: "", type: "uint256" }],
-    },
-    {
-      type: "function",
-      name: "allowance",
-      stateMutability: "view",
-      inputs: [
-        { name: "owner", type: "address" },
-        { name: "spender", type: "address" },
-      ],
-      outputs: [{ name: "", type: "uint256" }],
-    },
-    {
-      type: "function",
-      name: "approve",
-      stateMutability: "nonpayable",
-      inputs: [
-        { name: "spender", type: "address" },
-        { name: "value", type: "uint256" },
-      ],
-      outputs: [{ name: "", type: "bool" }],
-    },
-  ] as const;
-
-  const vaultAbi = [
-    {
-      type: "function",
-      name: "deposit",
-      stateMutability: "nonpayable",
-      inputs: [{ name: "amount", type: "uint256" }],
-      outputs: [],
-    },
-    {
-      type: "function",
-      name: "withdraw",
-      stateMutability: "nonpayable",
-      inputs: [{ name: "amount", type: "uint256" }],
-      outputs: [],
-    },
-    {
-      type: "function",
-      name: "balanceOf",
-      stateMutability: "view",
-      inputs: [{ name: "account", type: "address" }],
-      outputs: [{ name: "", type: "uint256" }],
-    },
-  ] as const;
-
-  // Load token decimals, balances, and allowance
-  useEffect(() => {
+  // Refresh token/vault balances and allowance
+  const refresh = useCallback(async () => {
     if (!address || !tokenAddress || !vaultAddress) return;
-    let mounted = true;
-    (async () => {
-      try {
-        const [dec, bal, allw, vbal] = await Promise.all([
-          client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
-          client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
-          client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "allowance", args: [address, vaultAddress] }) as Promise<bigint>,
-          client.readContract({ address: vaultAddress, abi: vaultAbi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
-        ]);
-        if (!mounted) return;
-        setDecimals(dec);
-        setTokenBalance(bal);
-        setAllowance(allw);
-        setVaultBalance(vbal);
-      } catch (e) {
-        // ignore read errors
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
+    try {
+      const [dec, bal, allw, vbal] = await Promise.all([
+        client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
+        client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
+        client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "allowance", args: [address, vaultAddress] }) as Promise<bigint>,
+        client.readContract({ address: vaultAddress, abi: vaultAbi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
+      ]);
+      setDecimals(dec);
+      setTokenBalance(bal);
+      setAllowance(allw);
+      setVaultBalance(vbal);
+    } catch {
+      // ignore read errors
+    }
   }, [address, tokenAddress, vaultAddress, client]);
+
+  // Initial and dependency-driven refresh
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   // Example transaction call - sending 0 ETH to self
   const calls = useMemo(() => {
@@ -174,8 +172,13 @@ export default function TransactionCard() {
         title: "Congratulations!",
         body: `You sent your a transaction, ${transactionHash}!`,
       });
+
+      // Refresh balances and reset form for consecutive actions
+      await refresh();
+      setAmount("");
+      setTxKey((k) => k + 1);
     },
-    [sendNotification]
+    [sendNotification, refresh]
   );
 
   return (
@@ -229,6 +232,7 @@ export default function TransactionCard() {
 
           {address ? (
             <Transaction
+              key={txKey}
               calls={calls}
               onSuccess={handleSuccess}
               onError={(error: TransactionError) =>
@@ -237,13 +241,11 @@ export default function TransactionCard() {
             >
               <TransactionButton className="text-white text-md" />
               <TransactionStatus>
-                <TransactionStatusAction />
                 <TransactionStatusLabel />
               </TransactionStatus>
               <TransactionToast className="mb-4">
                 <TransactionToastIcon />
                 <TransactionToastLabel />
-                <TransactionToastAction />
               </TransactionToast>
             </Transaction>
           ) : (
