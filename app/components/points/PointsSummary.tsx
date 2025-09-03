@@ -33,6 +33,23 @@ export default function PointsSummary() {
     return () => controller.abort();
   }, [fid]);
 
+  // Instant update via custom event from ClaimTxCard
+  useEffect(() => {
+    function onPointsUpdated(e: Event) {
+      try {
+        const detail = (e as CustomEvent).detail as { fid?: string; points?: number };
+        if (!detail) return;
+        if (fid && detail.fid === fid) {
+          setPoints(typeof detail.points === "number" ? detail.points : 0);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    window.addEventListener("bonsai:points-updated", onPointsUpdated as EventListener);
+    return () => window.removeEventListener("bonsai:points-updated", onPointsUpdated as EventListener);
+  }, [fid]);
+
   return (
     <Card title="Bonsai Points">
       <div className="flex items-baseline gap-2">

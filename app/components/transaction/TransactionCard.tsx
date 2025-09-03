@@ -209,10 +209,8 @@ export default function TransactionCard() {
   );
 
   return (
-    <Card title="Make Your First Transaction">
+    <Card title="Transaction">
       <div className="space-y-4">
-        <p className="text-[var(--app-foreground-muted)] mb-4">Deposit/Withdraw BCT via Vault on Base Sepolia.</p>
-
         {!tokenAddress || !vaultAddress ? (
           <p className="text-yellow-400 text-sm">Set NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in .env</p>
         ) : null}
@@ -257,10 +255,10 @@ export default function TransactionCard() {
 
             {address && tokenAddress && vaultAddress ? (
               <div className="text-xs text-[var(--app-foreground-muted)] space-y-1">
-                <div>Token balance: {Number(tokenBalance) / 10 ** decimals}</div>
-                <div>Vault balance: {Number(vaultBalance) / 10 ** decimals}</div>
+                <div>Your Wallet balance: {Number(tokenBalance) / 10 ** decimals}</div>
+                <div>Total your deposit in vault: {Number(vaultBalance) / 10 ** decimals}</div>
                 <div>Allowance: {Number(allowance) / 10 ** decimals}</div>
-                <div>Remaining claimable: {Number(remainingClaim) / 10 ** decimals}</div>
+                <div>Your claimable amount: {Number(remainingClaim) / 10 ** decimals}</div>
                 <div>Vault liquidity: {Number(vaultLiquidity) / 10 ** decimals}</div>
               </div>
             ) : null}
