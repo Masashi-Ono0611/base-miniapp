@@ -51,8 +51,8 @@ export default function Page() {
           body: JSON.stringify({ fid, taskId: task.id }),
         });
         if (res.ok) {
-          const data = await res.json().catch(() => null);
-          ok = Boolean((data as any)?.ok);
+          const data = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+          ok = Boolean(data?.ok);
         }
       } catch {
         ok = false;

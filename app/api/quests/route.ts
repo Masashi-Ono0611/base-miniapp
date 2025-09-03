@@ -47,8 +47,8 @@ export async function GET(req: NextRequest) {
     let completed: string[] = [];
     try {
       // Upstash supports smembers
-      const res = await (redis as any).smembers(keyForCompleted(fid));
-      completed = (res as string[]) || [];
+      const res = await redis!.smembers(keyForCompleted(fid));
+      completed = Array.isArray(res) ? (res as string[]) : [];
     } catch {
       completed = [];
     }

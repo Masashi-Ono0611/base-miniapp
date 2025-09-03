@@ -91,22 +91,22 @@ export default function ClaimTxCard() {
     return () => controller.abort();
   }, [fid]);
 
-  const { calls, disabled, reason } = useMemo(() => {
+  const { calls, disabled } = useMemo(() => {
     type Call = { to: `0x${string}`; data: `0x${string}`; value: bigint };
-    const empty = { calls: [] as Call[], disabled: true, reason: "Wallet or config not ready" };
+    const empty = { calls: [] as Call[], disabled: true };
     if (!address || !vaultAddress) return empty;
     const pts = Number(points || 0);
-    if (!pts || pts <= 0) return { calls: [] as Call[], disabled: true, reason: "Points is 0" };
+    if (!pts || pts <= 0) return { calls: [] as Call[], disabled: true };
     const amt = parseUnits(String(pts), decimals);
-    if (amt <= 0n) return { calls: [] as Call[], disabled: true, reason: "Amount is 0" };
+    if (amt <= 0n) return { calls: [] as Call[], disabled: true };
     // Validate against remainingClaim and vaultLiquidity
     if (remainingClaim > 0n && amt > remainingClaim)
-      return { calls: [] as Call[], disabled: true, reason: "Exceeds claimable" };
+      return { calls: [] as Call[], disabled: true };
     if (vaultLiquidity > 0n && amt > vaultLiquidity)
-      return { calls: [] as Call[], disabled: true, reason: "Exceeds vault liquidity" };
+      return { calls: [] as Call[], disabled: true };
 
     const claimData = encodeFunctionData({ abi: vaultAbi, functionName: "claim", args: [amt] });
-    return { calls: [{ to: vaultAddress, data: claimData as `0x${string}`, value: 0n }], disabled: false, reason: null as any };
+    return { calls: [{ to: vaultAddress, data: claimData as `0x${string}`, value: 0n }], disabled: false };
   }, [address, vaultAddress, points, decimals, remainingClaim, vaultLiquidity]);
 
   const sendNotification = useNotification();

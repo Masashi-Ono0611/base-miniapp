@@ -44,19 +44,19 @@ export async function POST(req: NextRequest) {
     if (!task) return NextResponse.json({ error: "Unknown task" }, { status: 400 });
 
     // Mark completion (idempotent)
-    const added = await (redis as any).sadd(keyForCompleted(fid), taskId);
+    const added = await redis!.sadd(keyForCompleted(fid), taskId);
 
     let points: number;
     if (added === 1) {
       // first-time completion: award points
       try {
-        points = await (redis as any).incrby(keyForPoints(fid), task.points);
+        points = await redis!.incrby(keyForPoints(fid), task.points);
       } catch {
         // Fallback: emulate incrby with get + set
         const current = await redis.get<number>(keyForPoints(fid));
         const prev = typeof current === "number" ? current : Number(current ?? 0) || 0;
         const next = prev + (Number(task.points) || 0);
-        await redis.set(keyForPoints(fid), next as any);
+        await redis.set(keyForPoints(fid), next);
         points = next;
       }
     } else {

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { Wallet, ConnectWallet, WalletDropdown, WalletDropdownDisconnect } from "@coinbase/onchainkit/wallet";
 import { Name, Identity, Avatar, Address, EthBalance } from "@coinbase/onchainkit/identity";
 import BottomNav from "../components/navigation/BottomNav";
@@ -30,7 +31,9 @@ export default function BottomLayout({ children }: { children: ReactNode }) {
         </header>
         <main className="flex-1">{children}</main>
       </div>
-      <BottomNav />
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }

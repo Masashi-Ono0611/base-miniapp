@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fid" }, { status: 400 });
     }
 
-    await redis.set(keyForPoints(fid), 0 as any);
+    await redis.set(keyForPoints(fid), 0);
     return NextResponse.json({ points: 0 });
   } catch (e) {
     console.error("POST /api/points/reset error", e);
