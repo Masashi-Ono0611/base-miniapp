@@ -91,15 +91,23 @@ export default function ClaimTxCard() {
     return () => controller.abort();
   }, [fid]);
 
-  const calls = useMemo(() => {
-    if (!address || !vaultAddress) return [] as { to: `0x${string}`; data: `0x${string}`; value: bigint }[];
+  const { calls, disabled, reason } = useMemo(() => {
+    type Call = { to: `0x${string}`; data: `0x${string}`; value: bigint };
+    const empty = { calls: [] as Call[], disabled: true, reason: "Wallet or config not ready" };
+    if (!address || !vaultAddress) return empty;
     const pts = Number(points || 0);
-    if (!pts || pts <= 0) return [] as { to: `0x${string}`; data: `0x${string}`; value: bigint }[];
+    if (!pts || pts <= 0) return { calls: [] as Call[], disabled: true, reason: "Points is 0" };
     const amt = parseUnits(String(pts), decimals);
-    if (amt <= 0n) return [] as { to: `0x${string}`; data: `0x${string}`; value: bigint }[];
+    if (amt <= 0n) return { calls: [] as Call[], disabled: true, reason: "Amount is 0" };
+    // Validate against remainingClaim and vaultLiquidity
+    if (remainingClaim > 0n && amt > remainingClaim)
+      return { calls: [] as Call[], disabled: true, reason: "Exceeds claimable" };
+    if (vaultLiquidity > 0n && amt > vaultLiquidity)
+      return { calls: [] as Call[], disabled: true, reason: "Exceeds vault liquidity" };
+
     const claimData = encodeFunctionData({ abi: vaultAbi, functionName: "claim", args: [amt] });
-    return [{ to: vaultAddress, data: claimData as `0x${string}`, value: 0n }];
-  }, [address, vaultAddress, points, decimals]);
+    return { calls: [{ to: vaultAddress, data: claimData as `0x${string}`, value: 0n }], disabled: false, reason: null as any };
+  }, [address, vaultAddress, points, decimals, remainingClaim, vaultLiquidity]);
 
   const sendNotification = useNotification();
 
@@ -162,7 +170,7 @@ export default function ClaimTxCard() {
             onSuccess={handleSuccess}
             onError={(error: TransactionError) => console.error("Claim tx failed:", error)}
           >
-            <TransactionButton className="text-white text-md" />
+            <TransactionButton className="text-white text-md" disabled={disabled} />
             <TransactionStatus>
               <TransactionStatusLabel />
             </TransactionStatus>
