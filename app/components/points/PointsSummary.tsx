@@ -17,6 +17,7 @@ export default function PointsSummary() {
         setLoading(true);
         const res = await fetch(`/api/points?fid=${encodeURIComponent(fid)}`, {
           signal: controller.signal,
+          cache: "no-store",
         });
         if (!res.ok) throw new Error("failed");
         const data = await res.json();
