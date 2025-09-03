@@ -78,16 +78,32 @@ const vaultAbi = [
     inputs: [{ name: "account", type: "address" }],
     outputs: [{ name: "", type: "uint256" }],
   },
+  {
+    type: "function",
+    name: "claim",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "remainingClaimable",
+    stateMutability: "view",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
 ] as const;
 
 export default function TransactionCard() {
   const { address } = useAccount();
-  const [mode, setMode] = useState<"deposit" | "withdraw">("deposit");
+  const [mode, setMode] = useState<"deposit" | "withdraw" | "claim">("deposit");
   const [amount, setAmount] = useState<string>("");
   const [decimals, setDecimals] = useState<number>(18);
   const [tokenBalance, setTokenBalance] = useState<bigint>(0n);
   const [vaultBalance, setVaultBalance] = useState<bigint>(0n);
   const [allowance, setAllowance] = useState<bigint>(0n);
+  const [remainingClaim, setRemainingClaim] = useState<bigint>(0n);
+  const [vaultLiquidity, setVaultLiquidity] = useState<bigint>(0n);
   const [txKey, setTxKey] = useState<number>(0);
   const tokenAddress = process.env.NEXT_PUBLIC_TOKEN_ADDRESS as `0x${string}` | undefined;
   const vaultAddress = process.env.NEXT_PUBLIC_VAULT_ADDRESS as `0x${string}` | undefined;
@@ -105,16 +121,20 @@ export default function TransactionCard() {
   const refresh = useCallback(async () => {
     if (!address || !tokenAddress || !vaultAddress) return;
     try {
-      const [dec, bal, allw, vbal] = await Promise.all([
+      const [dec, bal, allw, vbal, rem, vaultBal] = await Promise.all([
         client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "decimals" }) as Promise<number>,
         client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
         client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "allowance", args: [address, vaultAddress] }) as Promise<bigint>,
         client.readContract({ address: vaultAddress, abi: vaultAbi, functionName: "balanceOf", args: [address] }) as Promise<bigint>,
+        client.readContract({ address: vaultAddress, abi: vaultAbi, functionName: "remainingClaimable", args: [address] }) as Promise<bigint>,
+        client.readContract({ address: tokenAddress, abi: erc20Abi, functionName: "balanceOf", args: [vaultAddress] }) as Promise<bigint>,
       ]);
       setDecimals(dec);
       setTokenBalance(bal);
       setAllowance(allw);
       setVaultBalance(vbal);
+      setRemainingClaim(rem);
+      setVaultLiquidity(vaultBal);
     } catch {
       // ignore read errors
     }
@@ -148,13 +168,20 @@ export default function TransactionCard() {
         args: [amt],
       });
       txs.push({ to: vaultAddress, data: depositData as `0x${string}`, value: 0n });
-    } else {
+    } else if (mode === "withdraw") {
       const withdrawData = encodeFunctionData({
         abi: vaultAbi,
         functionName: "withdraw",
         args: [amt],
       });
       txs.push({ to: vaultAddress, data: withdrawData as `0x${string}`, value: 0n });
+    } else if (mode === "claim") {
+      const claimData = encodeFunctionData({
+        abi: vaultAbi,
+        functionName: "claim",
+        args: [amt],
+      });
+      txs.push({ to: vaultAddress, data: claimData as `0x${string}`, value: 0n });
     }
 
     return txs;
@@ -182,10 +209,8 @@ export default function TransactionCard() {
   );
 
   return (
-    <Card title="Make Your First Transaction">
+    <Card title="Transaction">
       <div className="space-y-4">
-        <p className="text-[var(--app-foreground-muted)] mb-4">Deposit/Withdraw BCT via Vault on Base Sepolia.</p>
-
         {!tokenAddress || !vaultAddress ? (
           <p className="text-yellow-400 text-sm">Set NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in .env</p>
         ) : null}
@@ -207,6 +232,13 @@ export default function TransactionCard() {
               >
                 Withdraw
               </button>
+              <button
+                className={`px-3 py-1 rounded border ${mode === "claim" ? "bg-blue-600 text-white" : "bg-[var(--app-card-bg)]"}`}
+                onClick={() => setMode("claim")}
+                type="button"
+              >
+                Claim
+              </button>
             </div>
 
             <div className="flex items-center gap-2">
@@ -223,9 +255,11 @@ export default function TransactionCard() {
 
             {address && tokenAddress && vaultAddress ? (
               <div className="text-xs text-[var(--app-foreground-muted)] space-y-1">
-                <div>Token balance: {Number(tokenBalance) / 10 ** decimals}</div>
-                <div>Vault balance: {Number(vaultBalance) / 10 ** decimals}</div>
+                <div>Your Wallet balance: {Number(tokenBalance) / 10 ** decimals}</div>
+                <div>Total your deposit in vault: {Number(vaultBalance) / 10 ** decimals}</div>
                 <div>Allowance: {Number(allowance) / 10 ** decimals}</div>
+                <div>Your claimable amount: {Number(remainingClaim) / 10 ** decimals}</div>
+                <div>Vault liquidity: {Number(vaultLiquidity) / 10 ** decimals}</div>
               </div>
             ) : null}
           </div>

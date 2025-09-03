@@ -110,3 +110,48 @@ To get started building your own frame, follow these steps:
 - [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+
+---
+
+## Bonsai Vault クレーム機能（日本語）
+
+本プロジェクトには、各ウォレットアドレスが累積で最大 10,000 BCT をデポジット無しでクレームできる Vault コントラクトが含まれています（Vault に十分な残高があることが条件）。
+
+### 前提
+- Base Sepolia へのデプロイ用に以下の環境変数を `.env` に設定してください:
+  - `BASE_SEPOLIA_RPC_URL`
+  - `PRIVATE_KEY`
+- フロントエンド用:
+  - `NEXT_PUBLIC_TOKEN_ADDRESS`
+  - `NEXT_PUBLIC_VAULT_ADDRESS`
+
+### デプロイと初期ファンド
+1. コントラクトをデプロイします:
+   ```bash
+   pnpm run deploy:base-sepolia
+   ```
+   スクリプト `scripts/deploy.js` は、トークンと Vault をデプロイ後、Vault に初期ファンドを送金します。
+
+2. 初期ファンド量の指定:
+   - 既定値は `200,000 BCT` です。
+   - 環境変数 `FUND_AMOUNT_BCT` で上書き可能です（例: `FUND_AMOUNT_BCT=300000`）。
+
+3. スクリプトの出力に表示される以下の値を `.env` に反映してください:
+   - `NEXT_PUBLIC_TOKEN_ADDRESS=...`
+   - `NEXT_PUBLIC_VAULT_ADDRESS=...`
+
+### フロントエンドでの操作
+- 画面 `/claim` のカード（`TransactionCard`）にて、`Claim` タブを選択し、金額を入力して送信します。
+- 画面には以下の情報が表示されます:
+  - `Remaining claimable`: ユーザーが残りクレーム可能な量
+  - `Vault liquidity`: Vault の保有残高
+- クレーム上限はアドレス毎に 10,000 BCT（累積）です。超過リクエストは失敗します。
+
+### テスト
+```bash
+pnpm run hh test
+```
+すべての Vault テスト（デポジット/引き出し/クレーム）が実行されます。
+
+### 注意
+- Hardhat は Node.js の LTS（推奨: 20.x）での実行を推奨します。最新 Node を利用すると警告が出る場合があります。

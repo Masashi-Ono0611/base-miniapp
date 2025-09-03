@@ -36,6 +36,14 @@ async function main() {
   await vault.waitForDeployment();
   console.log("Vault deployed:", await vault.getAddress());
 
+  // Fund the Vault so users can claim up to their allowance without prior deposit
+  // Default: 200,000 BCT (adjust via FUND_AMOUNT_BCT env if needed)
+  const fundAmountBct = process.env.FUND_AMOUNT_BCT || "200000";
+  const fundAmount = ethers.parseUnits(fundAmountBct, 18);
+  const txFund = await token.transfer(await vault.getAddress(), fundAmount);
+  await txFund.wait();
+  console.log(`Vault funded with ${fundAmountBct} BCT`);
+
   const outDir = path.join(__dirname, "..", "deployments");
   fs.mkdirSync(outDir, { recursive: true });
   const outfile = path.join(outDir, `${networkName}.json`);
@@ -44,6 +52,7 @@ async function main() {
     chainId,
     token: await token.getAddress(),
     vault: await vault.getAddress(),
+    funded: fundAmountBct,
   };
   fs.writeFileSync(outfile, JSON.stringify(out, null, 2));
   console.log(`Saved addresses to ${outfile}`);
@@ -51,6 +60,7 @@ async function main() {
   console.log("\nENV to copy:");
   console.log(`NEXT_PUBLIC_TOKEN_ADDRESS=${await token.getAddress()}`);
   console.log(`NEXT_PUBLIC_VAULT_ADDRESS=${await vault.getAddress()}`);
+  console.log(`# Vault funded with ${fundAmountBct} BCT`);
 }
 
 main().catch((e) => {

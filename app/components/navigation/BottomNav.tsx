@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/home", label: "Home" },
@@ -12,6 +12,8 @@ const NAV_ITEMS = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fid = searchParams.get("fid");
 
   return (
     <nav className="fixed bottom-0 left-0 right-0">
@@ -23,10 +25,11 @@ export default function BottomNav() {
           <ul className="grid grid-cols-4 h-14 items-stretch">
             {NAV_ITEMS.map((item) => {
               const active = pathname === item.href;
+              const href = fid ? `${item.href}?fid=${encodeURIComponent(fid)}` : item.href;
               return (
                 <li key={item.href} className="flex">
                   <Link
-                    href={item.href}
+                    href={href}
                     className={`flex-1 flex flex-col items-center justify-center gap-0.5 rounded-md text-xs transition-colors select-none ${
                       active
                         ? "text-[var(--app-foreground)] font-medium"
