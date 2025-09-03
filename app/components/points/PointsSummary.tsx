@@ -62,7 +62,7 @@ export default function PointsSummary() {
         ) : null}
       </div>
       {!fid ? (
-        <p className="text-xs text-yellow-400 mt-2">fid が未指定です。URL に ?fid=123 を付与してください。</p>
+        <p className="text-xs text-yellow-400 mt-2">fid is missing. Please add ?fid=123 to the URL.</p>
       ) : null}
     </Card>
   );

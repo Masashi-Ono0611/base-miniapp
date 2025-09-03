@@ -75,7 +75,7 @@ export default function Page() {
       <PointsSummary key={refreshKey} />
       <Card title="Quest">
         {!fid ? (
-          <p className="text-[var(--app-foreground-muted)] text-sm">fid が未指定です。URL に ?fid=123 を付与してください。</p>
+          <p className="text-[var(--app-foreground-muted)] text-sm">fid is missing. Please add ?fid=123 to the URL.</p>
         ) : loading ? (
           <p className="text-[var(--app-foreground-muted)]">Loading...</p>
         ) : tasks.length === 0 ? (
