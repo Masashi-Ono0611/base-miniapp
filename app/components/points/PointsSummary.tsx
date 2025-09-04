@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Card from "../ui/Card";
-import useFid from "../hooks/useFid";
+import useFid from "../../hooks/useFid";
 
 export default function PointsSummary() {
   const fid = useFid();

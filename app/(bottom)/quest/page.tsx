@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card, Button } from "../../components";
 import PointsSummary from "../../components/points/PointsSummary";
-import useFid from "../../components/hooks/useFid";
+import useFid from "../../hooks/useFid";
 
 type Task = {
   id: string;

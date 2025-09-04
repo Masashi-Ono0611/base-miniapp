@@ -15,7 +15,7 @@ import {
 } from "@coinbase/onchainkit/transaction";
 import { useNotification } from "@coinbase/onchainkit/minikit";
 import Card from "../ui/Card";
-import useFid from "../hooks/useFid";
+import useFid from "../../hooks/useFid";
 import { createPublicClient, http, encodeFunctionData, parseUnits } from "viem";
 import { baseSepolia } from "viem/chains";
 
