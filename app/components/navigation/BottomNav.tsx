@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { href: "/home", label: "Home" },
   { href: "/quest", label: "Quest" },
   { href: "/claim", label: "Claim" },
-  { href: "/setting", label: "Admin" },
+  { href: "/admin", label: "Admin" },
 ] as const;
 
 export default function BottomNav() {
