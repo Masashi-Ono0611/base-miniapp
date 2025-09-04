@@ -13,7 +13,11 @@ type Task = {
   completed?: boolean;
 };
 
-export default function QuestList() {
+type Props = {
+  onAnyCompleted?: () => void;
+};
+
+export default function QuestList({ onAnyCompleted }: Props) {
   const fid = useFid();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,6 +64,7 @@ export default function QuestList() {
       if (ok) {
         setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: true } : t)));
         setRefreshKey((k) => k + 1);
+        onAnyCompleted?.();
       }
       try {
         window.open(task.link, "_blank", "noopener,noreferrer");
