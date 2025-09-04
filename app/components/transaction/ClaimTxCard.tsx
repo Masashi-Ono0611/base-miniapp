@@ -148,20 +148,23 @@ export default function ClaimTxCard() {
   );
 
   return (
-    <Card title="Claim">
+    <Card title="Claim Tokens">
       <div className="space-y-4">
         {!tokenAddress || !vaultAddress ? (
-          <p className="text-yellow-400 text-sm">Set NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in .env</p>
+          <p className="text-yellow-400 text-sm">Environment not set. Please configure NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in your .env.</p>
         ) : null}
 
         <div className="w-full space-y-2">
           {address && tokenAddress && vaultAddress ? (
             <div className="text-xs text-[var(--app-foreground-muted)] space-y-1">
-              <div>Your claimable amount: {Number(remainingClaim) / 10 ** decimals}</div>
+              <div>Your claimable amount (limit): {Number(remainingClaim) / 10 ** decimals}</div>
               <div>Vault liquidity: {Number(vaultLiquidity) / 10 ** decimals}</div>
             </div>
           ) : null}
         </div>
+        <p className="text-xs text-[var(--app-foreground-muted)]">
+          You can claim up to your individual limit and only while the vault has enough liquidity. After a successful claim, your Bonsai Points will reset to 0 for the current fid.
+        </p>
 
         {address ? (
           <Transaction
@@ -170,7 +173,7 @@ export default function ClaimTxCard() {
             onSuccess={handleSuccess}
             onError={(error: TransactionError) => console.error("Claim tx failed:", error)}
           >
-            <TransactionButton className="text-white text-md" disabled={disabled} />
+            <TransactionButton className="text-white text-md" disabled={disabled} text="Claim" />
             <TransactionStatus>
               <TransactionStatusLabel />
             </TransactionStatus>
@@ -180,7 +183,7 @@ export default function ClaimTxCard() {
             </TransactionToast>
           </Transaction>
         ) : (
-          <p className="text-yellow-400 text-sm text-center mt-2">Connect your wallet to claim</p>
+          <p className="text-yellow-400 text-sm text-center mt-2">Connect your wallet to claim.</p>
         )}
       </div>
     </Card>

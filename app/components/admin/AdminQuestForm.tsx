@@ -163,20 +163,23 @@ export default function AdminQuestForm() {
   );
 
   return (
-    <Card title="Admin: Quests">
+    <Card title="Admin: Create a new quest">
       <div className="space-y-4">
         {error ? (
           <p className="text-red-400 text-sm">{error}</p>
         ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-3">
+          <p className="text-xs text-[var(--app-foreground-muted)]">
+            Create a quest and fund the vault with the same amount of tokens as the quest points. If needed, an approval transaction will be prompted before deposit.
+          </p>
           <div className="grid grid-cols-1 gap-3">
             <label className="text-sm text-[var(--app-foreground-muted)]">
               Title
               <input
                 value={form.title}
                 onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                placeholder="Follow X account"
+                placeholder="Follow our X account"
                 className="mt-1 w-full rounded-md border border-[var(--app-card-border)] bg-[var(--app-card-bg)] px-3 py-2"
               />
             </label>
@@ -185,7 +188,7 @@ export default function AdminQuestForm() {
               <input
                 value={form.link}
                 onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
-                placeholder="https://x.com/"
+                placeholder="https://x.com/..."
                 className="mt-1 w-full rounded-md border border-[var(--app-card-border)] bg-[var(--app-card-bg)] px-3 py-2"
               />
             </label>
@@ -203,7 +206,7 @@ export default function AdminQuestForm() {
         </form>
 
         {!tokenAddress || !vaultAddress ? (
-          <p className="text-yellow-400 text-sm">Set NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in .env</p>
+          <p className="text-yellow-400 text-sm">Environment not set. Please configure NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in your .env.</p>
         ) : null}
 
         {address ? (
@@ -213,7 +216,11 @@ export default function AdminQuestForm() {
             onSuccess={onTxSuccess}
             onError={() => setError("Transaction failed")}
           >
-            <TransactionButton className={`text-white text-md ${!valid || calls.length === 0 ? "opacity-50 pointer-events-none" : ""}`} />
+            <TransactionButton
+              className={`text-white text-md ${!valid || calls.length === 0 ? "opacity-50 pointer-events-none" : ""}`}
+              aria-label="Create quest"
+              text="Create"
+            />
             <TransactionStatus>
               <TransactionStatusLabel />
             </TransactionStatus>
@@ -223,7 +230,7 @@ export default function AdminQuestForm() {
             </TransactionToast>
           </Transaction>
         ) : (
-          <p className="text-yellow-400 text-sm">Connect your wallet to deposit and add quest</p>
+          <p className="text-yellow-400 text-sm">Connect your wallet to fund and create a quest.</p>
         )}
 
         {/* Current Tasks list is intentionally omitted */}

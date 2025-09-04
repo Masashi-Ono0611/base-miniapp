@@ -66,23 +66,20 @@ export default function QuestList({ onAnyCompleted }: Props) {
         setRefreshKey((k) => k + 1);
         onAnyCompleted?.();
       }
-      try {
-        window.open(task.link, "_blank", "noopener,noreferrer");
-      } catch {
-        // ignore
-      }
     },
     [fid]
   );
 
   return (
-    <Card title="Quest">
+    <Card title="Quests">
       {!fid ? (
-        <p className="text-[var(--app-foreground-muted)] text-sm">fid is missing. Please add ?fid=123 to the URL.</p>
+        <p className="text-[var(--app-foreground-muted)] text-sm" role="status">
+          Missing fid. Append <span className="font-mono">?fid=123</span> to the URL to enable quests.
+        </p>
       ) : loading ? (
-        <p className="text-[var(--app-foreground-muted)]">Loading...</p>
+        <p className="text-[var(--app-foreground-muted)]" role="status">Loading quests…</p>
       ) : tasks.length === 0 ? (
-        <p className="text-[var(--app-foreground-muted)]">No tasks available.</p>
+        <p className="text-[var(--app-foreground-muted)]">No quests available right now. Please check back later.</p>
       ) : (
         <div className="space-y-3">
           {tasks.map((task) => (
@@ -107,7 +104,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
                   }
                 }}
               >
-                {task.completed ? "Completed" : "Open"}
+                {task.completed ? "Completed" : "View Task"}
               </Button>
             </div>
           ))}
