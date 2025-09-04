@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     function exists(id: string) {
       return tasks.some((t) => t.id === id);
     }
-    let base = slugify(title) || "quest";
+    const base = slugify(title) || "quest";
     let id = String((body?.id || "").toString().trim());
     if (!id) {
       // generate unique id: <slug>-<ts>-<rand>
