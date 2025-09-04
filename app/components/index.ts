@@ -5,3 +5,5 @@ export { default as Home } from "./home/Home";
 export { default as TransactionCard } from "./transaction/TransactionCard";
 export { default as PointsSummary } from "./points/PointsSummary";
 export { default as ClaimTxCard } from "./transaction/ClaimTxCard";
+export { default as AdminQuestForm } from "./admin/AdminQuestForm";
+export { default as QuestList } from "./quests/QuestList";
