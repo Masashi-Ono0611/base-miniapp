@@ -53,16 +53,46 @@ export async function POST(req: NextRequest) {
   try {
     if (!redis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
     const body = (await req.json().catch(() => null)) as Partial<AdminQuestTask> | null;
-    const id = String(body?.id || "").trim();
     const title = String(body?.title || "").trim();
     const link = String(body?.link || "").trim();
     const pointsNum = Number(body?.points);
 
-    if (!id || !title || !link || Number.isNaN(pointsNum)) {
+    if (!title || !link || Number.isNaN(pointsNum)) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
     const tasks = await loadTasks();
+    // prefer provided id if present, otherwise auto-generate
+    function slugify(s: string) {
+      return s
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 32);
+    }
+    function exists(id: string) {
+      return tasks.some((t) => t.id === id);
+    }
+    let base = slugify(title) || "quest";
+    let id = String((body?.id || "").toString().trim());
+    if (!id) {
+      // generate unique id: <slug>-<ts>-<rand>
+      const ts = Date.now().toString(36);
+      let candidate = `${base}-${ts}-${Math.random().toString(36).slice(2, 6)}`;
+      // ensure uniqueness with a few attempts
+      let tries = 0;
+      while (exists(candidate) && tries < 5) {
+        candidate = `${base}-${ts}-${Math.random().toString(36).slice(2, 6)}`;
+        tries++;
+      }
+      // if still colliding, add counter suffix
+      let counter = 1;
+      while (exists(candidate)) {
+        candidate = `${base}-${ts}-${counter++}`;
+      }
+      id = candidate;
+    }
+
     const idx = tasks.findIndex((t) => t.id === id);
     const nextTask: AdminQuestTask = { id, title, link, points: pointsNum };
 
