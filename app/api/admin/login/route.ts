@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const ADMIN_PASSWORD = "bonsai";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "bonsai";
 
 export async function POST(req: NextRequest) {
   try {

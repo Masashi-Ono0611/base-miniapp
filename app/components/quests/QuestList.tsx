@@ -67,7 +67,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
         onAnyCompleted?.();
       }
     },
-    [fid]
+    [fid, onAnyCompleted]
   );
 
   return (

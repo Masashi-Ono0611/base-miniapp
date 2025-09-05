@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       }
       const search = window.location.search || "";
       window.location.href = `/admin${search}`;
-    } catch (e) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);

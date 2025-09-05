@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Hardcoded admin password (server-side only reference)
-const ADMIN_PASSWORD = "bonsai";
+// Admin password from environment (server-side only reference)
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "bonsai";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
