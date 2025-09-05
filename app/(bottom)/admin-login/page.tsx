@@ -28,6 +28,15 @@ export default function AdminLoginPage() {
         }
         return;
       }
+      // Save token for Mini App environments where cookies may not work
+      try {
+        const data = (await res.json().catch(() => null)) as { token?: string } | null;
+        if (data?.token) {
+          localStorage.setItem("bonsai_admin_token", data.token);
+        }
+      } catch {
+        // ignore
+      }
       const search = window.location.search || "";
       window.location.href = `/admin${search}`;
     } catch {

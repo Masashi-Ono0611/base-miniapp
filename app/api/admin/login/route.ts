@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { signAdminToken } from "@/lib/auth";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "bonsai";
 
@@ -15,7 +16,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Incorrect password." }, { status: 401 });
     }
 
-    const res = NextResponse.json({ ok: true });
+    const token = signAdminToken();
+    const res = NextResponse.json({ ok: true, token });
     // Set httpOnly cookie to allow middleware to validate
     res.cookies.set("admin_pass", ADMIN_PASSWORD, {
       httpOnly: true,

@@ -112,7 +112,10 @@ export default function AdminQuestForm() {
   const amountBI = useMemo(() => {
     if (!valid) return 0n;
     try {
-      return parseUnits(form.points, decimals);
+      // Admin must deposit 10x of Bonsai Points
+      const pts = Number(form.points || 0);
+      const depositTokenAmount = pts * 10; // 1 pt requires 10 BCT deposit
+      return parseUnits(String(depositTokenAmount), decimals);
     } catch {
       return 0n;
     }
@@ -139,9 +142,16 @@ export default function AdminQuestForm() {
     async () => {
       try {
         // After successful deposit, create quest in DB
+        const headers: Record<string, string> = { "content-type": "application/json" };
+        try {
+          const token = typeof window !== "undefined" ? localStorage.getItem("bonsai_admin_token") : null;
+          if (token) headers["authorization"] = `Bearer ${token}`;
+        } catch {
+          // ignore
+        }
         const res = await fetch("/api/quests/admin", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers,
           body: JSON.stringify({
             title: form.title.trim(),
             link: form.link.trim(),
@@ -171,7 +181,7 @@ export default function AdminQuestForm() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <p className="text-xs text-[var(--app-foreground-muted)]">
-            Create a quest and fund the vault with the same amount of tokens as the quest points. If needed, an approval transaction will be prompted before deposit.
+            Create a quest and fund the vault with <strong>10x</strong> the Bonsai Points as BCT tokens. For example, 100 pts → deposit 1,000 BCT. If needed, an approval transaction will be prompted before deposit.
           </p>
           <div className="grid grid-cols-1 gap-3">
             <label className="text-sm text-[var(--app-foreground-muted)]">
