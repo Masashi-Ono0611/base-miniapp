@@ -66,25 +66,25 @@ export default function QuestList({ onAnyCompleted }: Props) {
         setRefreshKey((k) => k + 1);
         onAnyCompleted?.();
       }
-      try {
-        window.open(task.link, "_blank", "noopener,noreferrer");
-      } catch {
-        // ignore
-      }
     },
-    [fid]
+    [fid, onAnyCompleted]
   );
 
   return (
-    <Card title="Quest">
+    <Card title="Quests">
       {!fid ? (
-        <p className="text-[var(--app-foreground-muted)] text-sm">fid is missing. Please add ?fid=123 to the URL.</p>
+        <p className="text-[var(--app-foreground-muted)] text-sm" role="status">
+          Missing fid. Append <span className="font-mono">?fid=123</span> to the URL to enable quests.
+        </p>
       ) : loading ? (
-        <p className="text-[var(--app-foreground-muted)]">Loading...</p>
+        <p className="text-[var(--app-foreground-muted)]" role="status">Loading quests…</p>
       ) : tasks.length === 0 ? (
-        <p className="text-[var(--app-foreground-muted)]">No tasks available.</p>
+        <p className="text-[var(--app-foreground-muted)]">No quests available right now. Please check back later.</p>
       ) : (
         <div className="space-y-3">
+          <p className="text-xs text-[var(--app-foreground-muted)]">
+            Rate: 1 pt = 10 BCT (e.g., 100 pts = 1000 BCT)
+          </p>
           {tasks.map((task) => (
             <div
               key={task.id}
@@ -92,7 +92,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
             >
               <div className="flex flex-col">
                 <span className="font-medium text-[var(--app-foreground)]">{task.title}</span>
-                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts</span>
+                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts (~{task.points * 10} BCT)</span>
               </div>
               <Button
                 variant={task.completed ? "secondary" : "primary"}
@@ -107,7 +107,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
                   }
                 }}
               >
-                {task.completed ? "Completed" : "Open"}
+                {task.completed ? "Completed" : "View Task"}
               </Button>
             </div>
           ))}

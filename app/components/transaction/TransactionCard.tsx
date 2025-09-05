@@ -15,6 +15,7 @@ import {
 } from "@coinbase/onchainkit/transaction";
 import { useNotification } from "@coinbase/onchainkit/minikit";
 import Card from "../ui/Card";
+import Button from "../ui/Button";
 import { createPublicClient, http, encodeFunctionData, parseUnits } from "viem";
 import { baseSepolia } from "viem/chains";
 
@@ -209,37 +210,40 @@ export default function TransactionCard() {
   );
 
   return (
-    <Card title="Transaction">
+    <Card title="Vault Transactions">
       <div className="space-y-4">
         {!tokenAddress || !vaultAddress ? (
-          <p className="text-yellow-400 text-sm">Set NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in .env</p>
+          <p className="text-yellow-400 text-sm">Environment not set. Please configure NEXT_PUBLIC_TOKEN_ADDRESS and NEXT_PUBLIC_VAULT_ADDRESS in your .env.</p>
         ) : null}
 
         <div className="flex flex-col items-center">
           <div className="w-full space-y-2">
             <div className="flex gap-2 justify-center">
-              <button
-                className={`px-3 py-1 rounded border ${mode === "deposit" ? "bg-blue-600 text-white" : "bg-[var(--app-card-bg)]"}`}
+              <Button
+                variant={mode === "deposit" ? "primary" : "secondary"}
+                size="sm"
                 onClick={() => setMode("deposit")}
-                type="button"
               >
                 Deposit
-              </button>
-              <button
-                className={`px-3 py-1 rounded border ${mode === "withdraw" ? "bg-blue-600 text-white" : "bg-[var(--app-card-bg)]"}`}
+              </Button>
+              <Button
+                variant={mode === "withdraw" ? "primary" : "secondary"}
+                size="sm"
                 onClick={() => setMode("withdraw")}
-                type="button"
               >
                 Withdraw
-              </button>
-              <button
-                className={`px-3 py-1 rounded border ${mode === "claim" ? "bg-blue-600 text-white" : "bg-[var(--app-card-bg)]"}`}
+              </Button>
+              <Button
+                variant={mode === "claim" ? "primary" : "secondary"}
+                size="sm"
                 onClick={() => setMode("claim")}
-                type="button"
               >
                 Claim
-              </button>
+              </Button>
             </div>
+            <p className="text-xs text-[var(--app-foreground-muted)] text-center">
+              Deposit may require an approval transaction first. Withdraw reduces your vault balance. Claim lets you receive tokens up to your claim limit and available vault liquidity.
+            </p>
 
             <div className="flex items-center gap-2">
               <input
@@ -250,15 +254,15 @@ export default function TransactionCard() {
                 onChange={(e) => setAmount(e.target.value)}
                 className="flex-1 rounded border px-3 py-2 bg-[var(--app-card-bg)]"
               />
-              <span className="text-xs text-[var(--app-foreground-muted)]">decimals: {decimals}</span>
+              <span className="text-xs text-[var(--app-foreground-muted)]">Decimals: {decimals}</span>
             </div>
 
             {address && tokenAddress && vaultAddress ? (
               <div className="text-xs text-[var(--app-foreground-muted)] space-y-1">
-                <div>Your Wallet balance: {Number(tokenBalance) / 10 ** decimals}</div>
-                <div>Total your deposit in vault: {Number(vaultBalance) / 10 ** decimals}</div>
+                <div>Your wallet balance: {Number(tokenBalance) / 10 ** decimals}</div>
+                <div>Your total deposit in vault: {Number(vaultBalance) / 10 ** decimals}</div>
                 <div>Allowance: {Number(allowance) / 10 ** decimals}</div>
-                <div>Your claimable amount: {Number(remainingClaim) / 10 ** decimals}</div>
+                <div>Your claimable amount (limit): {Number(remainingClaim) / 10 ** decimals}</div>
                 <div>Vault liquidity: {Number(vaultLiquidity) / 10 ** decimals}</div>
               </div>
             ) : null}
@@ -273,7 +277,10 @@ export default function TransactionCard() {
                 console.error("Transaction failed:", error)
               }
             >
-              <TransactionButton className="text-white text-md" />
+              <TransactionButton
+                className="text-white text-md"
+                text={mode === "deposit" ? "Deposit" : mode === "withdraw" ? "Withdraw" : "Claim"}
+              />
               <TransactionStatus>
                 <TransactionStatusLabel />
               </TransactionStatus>
@@ -283,9 +290,7 @@ export default function TransactionCard() {
               </TransactionToast>
             </Transaction>
           ) : (
-            <p className="text-yellow-400 text-sm text-center mt-2">
-              Connect your wallet to send a transaction
-            </p>
+            <p className="text-yellow-400 text-sm text-center mt-2">Connect your wallet to continue.</p>
           )}
         </div>
       </div>

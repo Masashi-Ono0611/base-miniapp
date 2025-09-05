@@ -53,16 +53,19 @@ export default function PointsSummary() {
   return (
     <Card title="Bonsai Points">
       <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-[var(--app-foreground)]">
+        <span className="text-3xl font-bold text-[var(--app-foreground)]" aria-live="polite">
           {points ?? 0}
         </span>
         <span className="text-[var(--app-foreground-muted)]">pts</span>
         {loading ? (
-          <span className="text-xs text-[var(--app-foreground-muted)]">loading...</span>
+          <span className="text-xs text-[var(--app-foreground-muted)]" role="status">Loading…</span>
         ) : null}
       </div>
+      <p className="text-xs text-[var(--app-foreground-muted)] mt-1">
+        Rate: 1 pt = 10 BCT (e.g., 100 pts = 1000 BCT)
+      </p>
       {!fid ? (
-        <p className="text-xs text-yellow-400 mt-2">fid is missing. Please add ?fid=123 to the URL.</p>
+        <p className="text-xs text-yellow-400 mt-2">Missing fid. Append <span className="font-mono">?fid=123</span> to the URL to track your points.</p>
       ) : null}
     </Card>
   );

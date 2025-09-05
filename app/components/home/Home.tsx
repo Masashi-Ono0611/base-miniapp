@@ -55,12 +55,14 @@ export default function Home() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <Card title="BONSAI Tap to Earn">
+      <Card title="Tap to Earn">
         <div className="space-y-4">
-          <p className="text-[var(--app-foreground-muted)]">Tap the bonsai to earn Bonsai Points.</p>
+          <p className="text-[var(--app-foreground-muted)]">
+            Tap the bonsai to earn Bonsai Points. Points can be claimed for tokens later.
+          </p>
 
           <div className="flex flex-col items-center">
-            <div className="text-4xl font-bold text-[var(--app-foreground)] mb-2">{points} pts</div>
+            <div className="text-4xl font-bold text-[var(--app-foreground)] mb-2" aria-live="polite">{points} pts</div>
             <button
               type="button"
               aria-label="Tap bonsai to earn"
