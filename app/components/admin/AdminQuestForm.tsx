@@ -142,9 +142,16 @@ export default function AdminQuestForm() {
     async () => {
       try {
         // After successful deposit, create quest in DB
+        const headers: Record<string, string> = { "content-type": "application/json" };
+        try {
+          const token = typeof window !== "undefined" ? localStorage.getItem("bonsai_admin_token") : null;
+          if (token) headers["authorization"] = `Bearer ${token}`;
+        } catch {
+          // ignore
+        }
         const res = await fetch("/api/quests/admin", {
           method: "POST",
-          headers: { "content-type": "application/json" },
+          headers,
           body: JSON.stringify({
             title: form.title.trim(),
             link: form.link.trim(),

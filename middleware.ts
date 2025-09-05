@@ -8,6 +8,12 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/admin")) {
+    const mode = (process.env.ADMIN_AUTH_MODE || "cookie").toLowerCase();
+    if (mode === "token") {
+      // In token mode, we cannot validate localStorage-based tokens here.
+      // Let client-side guard handle redirects.
+      return NextResponse.next();
+    }
     const pass = req.cookies.get("admin_pass")?.value;
     if (pass !== ADMIN_PASSWORD) {
       const url = req.nextUrl.clone();

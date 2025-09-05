@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAdminToken } from "@/lib/auth";
 import { redis } from "@/lib/redis";
 
 function envName() {
@@ -14,6 +15,21 @@ export type AdminQuestTask = {
   link: string;
   points: number;
 };
+
+function isAuthorized(req: NextRequest): boolean {
+  const mode = (process.env.ADMIN_AUTH_MODE || "cookie").toLowerCase();
+  const auth = req.headers.get("authorization") || "";
+  if (auth.toLowerCase().startsWith("bearer ")) {
+    const token = auth.slice(7).trim();
+    const { valid } = verifyAdminToken(token);
+    if (valid) return true;
+  }
+  // Cookie fallback (web app)
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "bonsai";
+  const pass = req.cookies.get("admin_pass")?.value;
+  if (mode !== "token" && pass === ADMIN_PASSWORD) return true;
+  return false;
+}
 
 async function loadTasks(): Promise<AdminQuestTask[]> {
   if (!redis) return [];
@@ -38,8 +54,9 @@ async function saveTasks(tasks: AdminQuestTask[]) {
   await redis.set(keyForTasks(), JSON.stringify(tasks));
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!redis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
     const tasks = await loadTasks();
     return NextResponse.json({ tasks });
@@ -51,6 +68,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!redis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
     const body = (await req.json().catch(() => null)) as Partial<AdminQuestTask> | null;
     const title = String(body?.title || "").trim();
@@ -109,6 +127,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!redis) return NextResponse.json({ error: "Redis not configured" }, { status: 500 });
     const { searchParams } = new URL(req.url);
     const id = String(searchParams.get("id") || "").trim();
