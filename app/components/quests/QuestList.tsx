@@ -82,9 +82,6 @@ export default function QuestList({ onAnyCompleted }: Props) {
         <p className="text-[var(--app-foreground-muted)]">No quests available right now. Please check back later.</p>
       ) : (
         <div className="space-y-3">
-          <p className="text-xs text-[var(--app-foreground-muted)]">
-            Rate: 1 pt = 1 BCT
-          </p>
           {tasks.map((task) => (
             <div
               key={task.id}
@@ -92,7 +89,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
             >
               <div className="flex flex-col">
                 <span className="font-medium text-[var(--app-foreground)]">{task.title}</span>
-                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts (~{task.points} BCT)</span>
+                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts</span>
               </div>
               <Button
                 variant={task.completed ? "secondary" : "primary"}
