@@ -61,9 +61,6 @@ export default function PointsSummary() {
           <span className="text-xs text-[var(--app-foreground-muted)]" role="status">Loading…</span>
         ) : null}
       </div>
-      <p className="text-xs text-[var(--app-foreground-muted)] mt-1">
-        Rate: 1 pt = 10 BCT (e.g., 100 pts = 1000 BCT)
-      </p>
       {!fid ? (
         <p className="text-xs text-yellow-400 mt-2">Missing fid. Append <span className="font-mono">?fid=123</span> to the URL to track your points.</p>
       ) : null}

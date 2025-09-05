@@ -83,7 +83,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
       ) : (
         <div className="space-y-3">
           <p className="text-xs text-[var(--app-foreground-muted)]">
-            Rate: 1 pt = 10 BCT (e.g., 100 pts = 1000 BCT)
+            Rate: 1 pt = 1 BCT
           </p>
           {tasks.map((task) => (
             <div
@@ -92,7 +92,7 @@ export default function QuestList({ onAnyCompleted }: Props) {
             >
               <div className="flex flex-col">
                 <span className="font-medium text-[var(--app-foreground)]">{task.title}</span>
-                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts (~{task.points * 10} BCT)</span>
+                <span className="text-xs text-[var(--app-foreground-muted)]">+{task.points} pts (~{task.points} BCT)</span>
               </div>
               <Button
                 variant={task.completed ? "secondary" : "primary"}
