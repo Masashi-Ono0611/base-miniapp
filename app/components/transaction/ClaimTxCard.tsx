@@ -97,7 +97,10 @@ export default function ClaimTxCard() {
     if (!address || !vaultAddress) return empty;
     const pts = Number(points || 0);
     if (!pts || pts <= 0) return { calls: [] as Call[], disabled: true };
-    const amt = parseUnits(String(pts), decimals);
+    // Conversion: 1 point = 10 BCT tokens
+    const TOKEN_PER_POINT = 10;
+    const converted = pts * TOKEN_PER_POINT;
+    const amt = parseUnits(String(converted), decimals);
     if (amt <= 0n) return { calls: [] as Call[], disabled: true };
     // Validate against remainingClaim and vaultLiquidity
     if (remainingClaim > 0n && amt > remainingClaim)
@@ -165,6 +168,14 @@ export default function ClaimTxCard() {
         <p className="text-xs text-[var(--app-foreground-muted)]">
           You can claim up to your individual limit and only while the vault has enough liquidity. After a successful claim, your Bonsai Points will reset to 0 for the current fid.
         </p>
+        <div className="text-xs text-[var(--app-foreground-muted)]">
+          <div>Current rate: 1 pt = 10 BCT (e.g., 100 pts = 1000 BCT)</div>
+          {Number(points || 0) > 0 ? (
+            <div>
+              Estimated claim from your points: {Number(points) * 10} BCT
+            </div>
+          ) : null}
+        </div>
 
         {address ? (
           <Transaction
