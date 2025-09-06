@@ -166,7 +166,7 @@ export default function ClaimTxCard() {
           ) : null}
         </div>
         <p className="text-xs text-[var(--app-foreground-muted)]">
-          You can claim up to your individual limit and only while the vault has enough liquidity. After a successful claim, your Bonsai Points will reset to 0 for the current fid.
+          You can claim up to your individual limit and only while the vault has enough liquidity. After a successful claim, your Bonsai Points will reset to 0.
         </p>
         <div className="text-xs text-[var(--app-foreground-muted)]">
           <div>Current rate: 1 pt = 1 BCT</div>

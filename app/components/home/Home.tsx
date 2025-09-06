@@ -58,7 +58,7 @@ export default function Home() {
       <Card title="Tap to Earn">
         <div className="space-y-4">
           <p className="text-[var(--app-foreground-muted)]">
-            Tap the bonsai to earn Bonsai Points. Points can be claimed for tokens later.
+            Tap the bonsai to earn Bonsai Points. 
           </p>
 
           <div className="flex flex-col items-center">
