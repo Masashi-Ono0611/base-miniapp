@@ -9,7 +9,7 @@ import {
   TransactionToastIcon,
   TransactionToastLabel,
   TransactionError,
-  TransactionResponse,
+  TransactionResponseType,
   TransactionStatusLabel,
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
@@ -191,7 +191,7 @@ export default function TransactionCard() {
   const sendNotification = useNotification();
 
   const handleSuccess = useCallback(
-    async (response: TransactionResponse) => {
+    async (response: TransactionResponseType) => {
       const transactionHash = response.transactionReceipts[0].transactionHash;
 
       console.log(`Transaction successful: ${transactionHash}`);

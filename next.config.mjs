@@ -1,13 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Silence warnings
+  // Empty turbopack config to silence Next.js 16 warning
+  turbopack: {},
+  // Webpack configuration for WalletConnect
   // https://github.com/WalletConnect/walletconnect-monorepo/issues/1908
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
   images: {
-    domains: ["static.wixstatic.com"],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'static.wixstatic.com',
+      },
+    ],
   },
 };
 

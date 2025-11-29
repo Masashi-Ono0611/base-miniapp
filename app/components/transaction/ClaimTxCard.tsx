@@ -9,7 +9,7 @@ import {
   TransactionToastIcon,
   TransactionToastLabel,
   TransactionError,
-  TransactionResponse,
+  TransactionResponseType,
   TransactionStatusLabel,
   TransactionStatus,
 } from "@coinbase/onchainkit/transaction";
@@ -115,7 +115,7 @@ export default function ClaimTxCard() {
   const sendNotification = useNotification();
 
   const handleSuccess = useCallback(
-    async (response: TransactionResponse) => {
+    async (response: TransactionResponseType) => {
       const transactionHash = response.transactionReceipts[0].transactionHash;
       console.log(`Claim tx successful: ${transactionHash}`);
       await sendNotification({ title: "Claimed!", body: `Tx: ${transactionHash}` });

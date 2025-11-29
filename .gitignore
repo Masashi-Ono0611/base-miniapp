@@ -41,3 +41,6 @@ next-env.d.ts
 /artifacts/
 /cache/
 /deployments/
+
+# build logs
+build_log.txt

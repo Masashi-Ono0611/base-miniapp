@@ -12,33 +12,34 @@
     "deploy:base-sepolia": "hardhat run scripts/deploy.js --network base_sepolia"
   },
   "dependencies": {
-    "@coinbase/onchainkit": "latest",
+    "@coinbase/onchainkit": "^1.1.2",
     "@farcaster/miniapp-sdk": "^0.1.9",
-    "@upstash/redis": "^1.34.4",
-    "next": "^15.3.3",
-    "react": "^18",
-    "react-dom": "^18",
     "@tanstack/react-query": "^5",
-    "viem": "^2.27.2",
-    "wagmi": "^2.16.0"
+    "@upstash/redis": "^1.34.4",
+    "next": "^16.0.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.40.3",
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^22",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "dotenv": "^16.4.5",
     "eslint": "^8",
     "eslint-config-next": "15.3.3",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "prettier": "^3.5.3",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5",
     "hardhat": "^2.22.7",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "dotenv": "^16.4.5",
-    "@openzeppelin/contracts": "^5.0.2"
+    "postcss": "^8",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5"
   }
 }
