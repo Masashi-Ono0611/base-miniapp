@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 // Admin password from environment (server-side only reference)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "bonsai";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith("/admin")) {
@@ -27,7 +27,6 @@ export function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-// Limit the middleware to only the admin route
 export const config = {
   matcher: ["/admin/:path*"],
 };

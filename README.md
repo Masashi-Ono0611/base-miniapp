@@ -1,23 +1,21 @@
-# MiniKit Template
+# BonsaiBaseApp
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-onchain --mini`](), configured with:
+BonsaiBaseApp is a Mini App built on Base that lets users earn **Bonsai Points** by completing quests and later claim **BCT tokens** from a shared onchain Vault.
 
-- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
-- [OnchainKit](https://www.base.org/builders/onchainkit)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Next.js](https://nextjs.org/docs)
+Key characteristics:
+
+- Quest-based point system backed by a database API
+- Per-address claim limit enforced onchain (up to **10,000 BCT** cumulatively)
+- Vault liquidity checks so users can only claim while the Vault has enough funds
+- Admin UI to seed quests and fund the Vault from the browser
+
+Under the hood, BonsaiBaseApp is a [Next.js](https://nextjs.org) project bootstrapped with `create-onchain --mini` and extended for this use case.
 
 ## Getting Started
 
-1. Install dependencies:
+1. Install dependencies (this project uses `pnpm` by default):
 ```bash
-npm install
-# or
-yarn install
-# or
 pnpm install
-# or
-bun install
 ```
 
 2. Verify environment variables, these will be set up by the `npx create-onchain --mini` command:
@@ -60,32 +58,30 @@ REDIS_TOKEN=
 
 3. Start the development server:
 ```bash
-npm run dev
+pnpm dev
 ```
 
-## Template Features
+## App Features
 
-### Frame Configuration
-- `.well-known/farcaster.json` endpoint configured for Frame metadata and account association
-- Frame metadata automatically added to page headers in `layout.tsx`
+### User Experience
+- **Home / Quests**: users see available quests and their current Bonsai Points.
+- **Claim page (`/claim`)**: shows remaining claimable BCT, Vault liquidity, and lets the user submit an onchain claim transaction.
+- **MiniKit integration**: FIDs and Farcaster context are read via MiniKit so the app behaves correctly inside Mini Apps.
 
-### Background Notifications
-- Redis-backed notification system using Upstash
-- Ready-to-use notification endpoints in `api/notify` and `api/webhook`
-- Notification client utilities in `lib/notification-client.ts`
+### Smart Contracts
+- **BonsaiCoinTest (BCT)**
+  - ERC‑20 token used as the reward currency.
+- **Vault**
+  - Holds BCT liquidity for all users.
+  - Enforces a per-address cumulative claim cap (10,000 BCT).
+  - Exposes functions for deposits and claims.
 
-### Theming
-- Custom theme defined in `theme.css` with OnchainKit variables
-- Pixel font integration with Pixelify Sans
-- Dark/light mode support through OnchainKit
-
-### MiniKit Provider
-The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
-- OnchainKit integration
-- Access to Frames context
-- Sets up Wagmi Connectors
-- Sets up Frame SDK listeners
-- Applies Safe Area Insets
+### Admin Flow
+- `/admin` page:
+  - Create a new quest and fund the Vault in one flow.
+  - Uses the connected wallet to approve and deposit BCT into the Vault.
+- `/admin-login` page:
+  - Simple password-gated access to the admin area.
 
 ## Customization
 
@@ -111,47 +107,59 @@ To get started building your own frame, follow these steps:
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 
+## Tech Stack & Tooling
+
+BonsaiBaseApp is built with:
+
+- **Framework**: Next.js 16 (App Router), React 19, TypeScript 5
+- **Onchain integration**: OnchainKit, MiniKit, wagmi 2.x, viem 2.x
+- **Styling**: Tailwind CSS 4, custom theme in `theme.css`
+- **State / data**: TanStack Query 5, Upstash Redis for notifications
+- **Smart contracts**: Hardhat 2.26, `@nomicfoundation/hardhat-toolbox` 4.x
+- **Tooling**: ESLint 9 (flat config), Prettier 3, pnpm
+
 ---
 
-## Bonsai Vault クレーム機能（日本語）
+## Bonsai Vault Claiming
 
-本プロジェクトには、各ウォレットアドレスが累積で最大 10,000 BCT をデポジット無しでクレームできる Vault コントラクトが含まれています（Vault に十分な残高があることが条件）。
+This project includes a Vault contract that lets each wallet address claim up to **10,000 BCT in total** without any prior deposit, as long as the Vault has enough liquidity.
 
-### 前提
-- Base Sepolia へのデプロイ用に以下の環境変数を `.env` に設定してください:
+### Prerequisites
+- For Base Sepolia deployment, set the following environment variables in your `.env`:
   - `BASE_SEPOLIA_RPC_URL`
   - `PRIVATE_KEY`
-- フロントエンド用:
+- For the frontend:
   - `NEXT_PUBLIC_TOKEN_ADDRESS`
   - `NEXT_PUBLIC_VAULT_ADDRESS`
 
-### デプロイと初期ファンド
-1. コントラクトをデプロイします:
+### Deploy and Fund the Vault
+1. Deploy contracts to Base Sepolia:
    ```bash
    pnpm run deploy:base-sepolia
    ```
-   スクリプト `scripts/deploy.js` は、トークンと Vault をデプロイ後、Vault に初期ファンドを送金します。
+   The `scripts/deploy.js` script deploys the ERC-20 token (`BonsaiCoinTest`) and `Vault`, then sends an initial amount of tokens to the Vault.
 
-2. 初期ファンド量の指定:
-   - 既定値は `200,000 BCT` です。
-   - 環境変数 `FUND_AMOUNT_BCT` で上書き可能です（例: `FUND_AMOUNT_BCT=300000`）。
+2. Configure initial funding amount:
+   - Default: `200,000 BCT`.
+   - Override with the `FUND_AMOUNT_BCT` environment variable (e.g. `FUND_AMOUNT_BCT=300000`).
 
-3. スクリプトの出力に表示される以下の値を `.env` に反映してください:
+3. After deployment, copy the printed values into your `.env`:
    - `NEXT_PUBLIC_TOKEN_ADDRESS=...`
    - `NEXT_PUBLIC_VAULT_ADDRESS=...`
 
-### フロントエンドでの操作
-- 画面 `/claim` のカード（`TransactionCard`）にて、`Claim` タブを選択し、金額を入力して送信します。
-- 画面には以下の情報が表示されます:
-  - `Remaining claimable`: ユーザーが残りクレーム可能な量
-  - `Vault liquidity`: Vault の保有残高
-- クレーム上限はアドレス毎に 10,000 BCT（累積）です。超過リクエストは失敗します。
+### Claiming from the Frontend
+- Open the `/claim` page.
+- The `Claim` card shows:
+  - `Remaining claimable`: your remaining personal claim limit
+  - `Vault liquidity`: the Vault's token balance
+- You can claim up to your individual limit (10,000 BCT cumulative). Requests above the limit or above Vault liquidity will fail.
 
-### テスト
+### Tests
 ```bash
 pnpm run hh test
 ```
-すべての Vault テスト（デポジット/引き出し/クレーム）が実行されます。
+This runs all Vault tests, including deposit, withdraw, and claim behavior.
 
-### 注意
-- Hardhat は Node.js の LTS（推奨: 20.x）での実行を推奨します。最新 Node を利用すると警告が出る場合があります。
+### Notes
+- Hardhat is best run on a Node.js LTS version (e.g. 20.x). Newer Node versions may print warnings.
+
