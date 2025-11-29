@@ -6,6 +6,12 @@ const nextConfig = {
   // https://github.com/WalletConnect/walletconnect-monorepo/issues/1908
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
+    // Alias for wagmi experimental entry removed in newer versions
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      "wagmi/experimental": "wagmi",
+    };
     return config;
   },
   images: {
