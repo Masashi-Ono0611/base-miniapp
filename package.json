@@ -29,6 +29,7 @@
     "@types/node": "^22",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "baseline-browser-mapping": "^2.8.32",
     "dotenv": "^16.4.5",
     "eslint": "^8",
     "eslint-config-next": "15.3.3",
